@@ -119,8 +119,9 @@ export default function CreateCompany() {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="(555) 123-4567"
+                  placeholder="7187587580"
                 />
+                <p className="text-xs text-slate-500 mt-1">Any format accepted (e.g., 7187587580, (718) 758-7580, 718-758-7580)</p>
               </div>
 
               <div>
