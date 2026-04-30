@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bids-postgres
+    environment:
+      POSTGRES_USER: bids_user
+      POSTGRES_PASSWORD: bids_password
+      POSTGRES_DB: bids_db
+    ports:
+      - "6900:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bids_user -d bids_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bids-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bids-backend
+    environment:
+      DATABASE_URL: postgresql://bids_user:bids_password@postgres:5432/bids_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      UPLOAD_DIR: /uploads
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@bidstracker.com}
+      NODE_ENV: production
+    ports:
+      - "6902:3000"
+    volumes:
+      - uploads:/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bids-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bids-frontend
+    environment:
+      VITE_API_URL: /api
+    networks:
+      - bids-network
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: bids-nginx
+    ports:
+      - "6901:80"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - bids-network
+
+volumes:
+  postgres_data:
+  uploads:
+
+networks:
+  bids-network:
+    driver: bridge

@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  agencies  Agency[]
+  projects  Project[]
+}
+
+model Agency {
+  id             String         @id @default(cuid())
+  name           String
+  address        String
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactPersons ContactPerson[]
+  projects       Project[]
+  createdAt      DateTime       @default(now())
+}
+
+model ContactPerson {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  agencyId  String
+  agency    Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id                    String    @id @default(cuid())
+  schoolName            String
+  description           String
+  bidDueDate            DateTime
+  preBidWalkthroughDate DateTime
+  address               String
+  agencyId              String
+  agency                Agency    @relation(fields: [agencyId], references: [id], onDelete: Restrict)
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addenda               Addendum[]
+  files                 ProjectFile[]
+  createdAt             DateTime  @default(now())
+}
+
+model Addendum {
+  id             String   @id @default(cuid())
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  addendumDate   DateTime
+  hasAttachment  Boolean  @default(false)
+  attachmentPath String?
+  noAttachment   Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model ProjectFile {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileName  String
+  filePath  String
+  fileType  String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+}
