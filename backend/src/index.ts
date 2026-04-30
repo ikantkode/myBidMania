@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import { randomBytes } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth';
 import agencyRoutes from './routes/agencies';
@@ -13,6 +14,13 @@ import settingsRoutes from './routes/settings';
 import { initEmailScheduler } from './utils/emailScheduler';
 
 dotenv.config();
+
+// Generate JWT_SECRET if not provided
+if (!process.env.JWT_SECRET) {
+  const generatedSecret = randomBytes(64).toString('hex');
+  process.env.JWT_SECRET = generatedSecret;
+  console.log('🔑 Generated JWT_SECRET automatically');
+}
 
 const prisma = new PrismaClient();
 const app = express();

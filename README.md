@@ -47,7 +47,6 @@ A complete dockerized React application for tracking construction bids with Post
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- SMTP server configured (for email notifications)
 
 ### 1. Clone and Navigate
 
@@ -55,20 +54,39 @@ A complete dockerized React application for tracking construction bids with Post
 cd bids
 ```
 
-### 2. Configure Environment Variables
+### 2. Start the Application
 
-Copy `.env.example` to `.env` and configure:
+```bash
+docker compose up --build
+```
+
+That's it! The application will:
+- Generate a secure JWT secret automatically
+- Set up the PostgreSQL database
+- Run all necessary migrations
+- Start all services
+
+First start will take a few minutes to build images.
+
+### 3. Access the Application
+
+Open your browser and navigate to:
+
+```
+http://localhost:6901
+```
+
+### Optional: Configure Email Notifications
+
+If you want email notifications for bid deadlines, create a `.env` file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration:
+Then edit `.env` with your SMTP configuration:
 
 ```env
-# JWT Secret (generate a strong random string)
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-
 # Email Configuration (for bid deadline reminders)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -77,20 +95,11 @@ SMTP_PASS=your-app-password
 EMAIL_FROM=noreply@bidstracker.com
 ```
 
-### 3. Build and Start
+Restart the containers after adding `.env`:
 
 ```bash
+docker compose down
 docker compose up --build
-```
-
-First start will take a few minutes to build images and run database migrations.
-
-### 4. Access the Application
-
-Open your browser and navigate to:
-
-```
-http://localhost:6901
 ```
 
 ## Application Flow
@@ -305,7 +314,8 @@ docker compose up --build
 
 ## Security Notes
 
-- Change JWT_SECRET in production
+- JWT_SECRET is auto-generated on first start (check backend logs for the value)
+- For production, set your own JWT_SECRET in `.env` for better security
 - Use strong passwords for database
 - Configure HTTPS for production
 - Regular security updates for dependencies

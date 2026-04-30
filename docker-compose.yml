@@ -25,7 +25,6 @@ services:
     container_name: bids-backend
     environment:
       DATABASE_URL: postgresql://bids_user:bids_password@postgres:5432/bids_db
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
       UPLOAD_DIR: /uploads
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
       SMTP_PORT: ${SMTP_PORT:-587}

@@ -1,20 +1,11 @@
 # Quick Start Guide - Bids Tracker
 
-## 🚀 Fast Start (3 Steps)
+## 🚀 Fast Start (2 Steps)
 
-### 1. Configure Environment
+### 1. Navigate to Project
 ```bash
 cd /home/shakespear/bids
-
-# Edit .env file with your settings
-nano .env
 ```
-
-**Minimum required:**
-- Set a strong `JWT_SECRET`
-
-**Optional (for email notifications):**
-- Configure SMTP settings
 
 ### 2. Start Application
 ```bash
@@ -22,6 +13,7 @@ nano .env
 ```
 
 This will:
+- Auto-generate a secure JWT secret
 - Build Docker images
 - Start all services
 - Run database migrations
@@ -31,6 +23,8 @@ This will:
 ```
 http://localhost:6901
 ```
+
+**Note:** JWT_SECRET is auto-generated. For email notifications, optionally configure SMTP settings in `.env`.
 
 ## 📁 Project Structure
 
