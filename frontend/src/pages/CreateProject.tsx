@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X, Upload, Building2 } from 'lucide-react';
-import { projectAPI, agencyAPI } from '@/lib/api';
+import { projectAPI, agencyAPI, companyAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,7 @@ export default function CreateProject() {
     address: '',
     agencyId: '',
     contactPersonId: '',
+    companyIds: [] as string[],
   });
 
   const [addenda, setAddenda] = useState<Addendum[]>([]);
@@ -48,6 +49,16 @@ export default function CreateProject() {
       const res = await agencyAPI.getAll();
       return res.data;
     },
+  });
+
+  const { data: companies } = useQuery({
+    queryKey: ['companies', formData.agencyId],
+    queryFn: async () => {
+      if (!formData.agencyId) return [];
+      const res = await companyAPI.getByAgency(formData.agencyId);
+      return res.data;
+    },
+    enabled: !!formData.agencyId,
   });
 
   // Check if no agencies exist
@@ -115,6 +126,7 @@ export default function CreateProject() {
           address: data.address || '',
           agencyId: data.agencyId || '',
           contactPersonId: '',
+          companyIds: data.companies?.map((pc: any) => pc.companyId) || [],
         });
         if (data.addenda && data.addenda.length > 0) {
           setAddenda(data.addenda.map((a: any) => ({
@@ -176,7 +188,12 @@ export default function CreateProject() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'agencyId') {
+      // Reset companyIds when agency changes
+      setFormData(prev => ({ ...prev, [field]: value, companyIds: [] }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleAddAddendum = () => {
@@ -213,6 +230,7 @@ export default function CreateProject() {
       ...formData,
       bidDueDate: new Date(formData.bidDueDate).toISOString(),
       preBidWalkthroughDate: new Date(formData.preBidWalkthroughDate).toISOString(),
+      companyIds: formData.companyIds,
       addenda: addenda.filter(a => a.addendumDate).map(a => ({
         addendumDate: new Date(a.addendumDate).toISOString(),
         noAttachment: a.noAttachment,
@@ -379,6 +397,50 @@ export default function CreateProject() {
                   </div>
                 )}
               </div>
+
+              {companies && companies.length > 0 && (
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-lg font-semibold">Companies (Optional)</h3>
+                    <p className="text-sm text-slate-500">Select companies that work with this agency</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {companies.map((company: any) => (
+                      <label
+                        key={company.id}
+                        className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                          formData.companyIds.includes(company.id)
+                            ? 'bg-green-50 border-green-500'
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <Checkbox
+                          id={`company-${company.id}`}
+                          checked={formData.companyIds.includes(company.id)}
+                          onCheckedChange={(checked) => {
+                            setFormData(prev => ({
+                              ...prev,
+                              companyIds: checked
+                                ? [...prev.companyIds, company.id]
+                                : prev.companyIds.filter(id => id !== company.id)
+                            }));
+                          }}
+                          className="mt-0.5"
+                        />
+                        <div className="flex-1">
+                          <span className="font-medium text-sm">{company.name}</span>
+                          {company.email && (
+                            <div className="text-xs text-slate-500">{company.email}</div>
+                          )}
+                          {company.phone && (
+                            <div className="text-xs text-slate-500">{company.phone}</div>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">

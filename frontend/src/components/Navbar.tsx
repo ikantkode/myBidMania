@@ -33,7 +33,7 @@ export default function Navbar({ user }: NavbarProps) {
   const navItems = [
     { path: '/', icon: '📅', label: 'Calendar' },
     { path: '/projects', icon: '📁', label: 'Projects' },
-    { path: '/agencies', icon: '🏢', label: 'Agencies' },
+    { path: '/directory', icon: '📋', label: 'Directory' },
     { path: '/team-members', icon: '👥', label: 'Team' },
   ];
 

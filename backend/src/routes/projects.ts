@@ -21,6 +21,18 @@ router.get('/', async (req: AuthRequest, res) => {
           }
         },
         addenda: true,
+        companies: {
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true
+              }
+            }
+          }
+        },
         _count: {
           select: { files: true }
         }
@@ -57,7 +69,8 @@ router.post('/', [
       address,
       agencyId,
       contactPersonId,
-      addenda
+      addenda,
+      companyIds
     } = req.body;
 
     const agency = await prisma.agency.findFirst({
@@ -87,11 +100,28 @@ router.post('/', [
             noAttachment: addendum.noAttachment || false,
             attachmentPath: addendum.attachmentPath || null
           }))
+        } : undefined,
+        companies: companyIds && companyIds.length > 0 ? {
+          create: companyIds.map((companyId: string) => ({
+            companyId
+          }))
         } : undefined
       },
       include: {
         agency: true,
-        addenda: true
+        addenda: true,
+        companies: {
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -127,7 +157,19 @@ router.get('/:id', async (req: AuthRequest, res) => {
           }
         },
         addenda: true,
-        files: true
+        files: true,
+        companies: {
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -162,7 +204,8 @@ router.put('/:id', [
       bidDueDate,
       preBidWalkthroughDate,
       address,
-      agencyId
+      agencyId,
+      companyIds
     } = req.body;
 
     // Get the old project to check for timing changes
@@ -209,12 +252,44 @@ router.put('/:id', [
       return res.status(404).json({ message: 'Project not found' });
     }
 
+    // Update company relationships if provided
+    if (companyIds !== undefined) {
+      // Delete existing company relationships
+      await prisma.projectCompany.deleteMany({
+        where: {
+          projectId: req.params.id
+        }
+      });
+
+      // Create new company relationships
+      if (companyIds.length > 0) {
+        await prisma.projectCompany.createMany({
+          data: companyIds.map((companyId: string) => ({
+            projectId: req.params.id,
+            companyId
+          }))
+        });
+      }
+    }
+
     const updatedProject = await prisma.project.findUnique({
       where: { id: req.params.id },
       include: {
         agency: true,
         addenda: true,
-        files: true
+        files: true,
+        companies: {
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true
+              }
+            }
+          }
+        }
       }
     });
 

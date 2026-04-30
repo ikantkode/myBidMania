@@ -6,6 +6,7 @@ import { randomBytes } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth';
 import agencyRoutes from './routes/agencies';
+import companyRoutes from './routes/companies';
 import projectRoutes from './routes/projects';
 import calendarRoutes from './routes/calendar';
 import notificationRoutes from './routes/notifications';
@@ -54,6 +55,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/agencies', agencyRoutes);
+app.use('/api/companies', companyRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/notifications', notificationRoutes);

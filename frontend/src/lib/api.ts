@@ -53,6 +53,17 @@ export const agencyAPI = {
     api.delete(`/agencies/${agencyId}/contacts/${contactId}`),
 };
 
+export const companyAPI = {
+  getAll: () => api.get('/companies'),
+  getByAgency: (agencyId: string) => api.get(`/companies/agency/${agencyId}`),
+  getOne: (id: string) => api.get(`/companies/${id}`),
+  create: (data: { name: string; email?: string; phone?: string; agencyIds: string[] }) =>
+    api.post('/companies', data),
+  update: (id: string, data: { name: string; email?: string; phone?: string; agencyIds: string[] }) =>
+    api.put(`/companies/${id}`, data),
+  delete: (id: string) => api.delete(`/companies/${id}`),
+};
+
 export const projectAPI = {
   getAll: () => api.get('/projects'),
   create: (data: any) => api.post('/projects', data),

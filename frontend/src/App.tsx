@@ -8,6 +8,8 @@ import ProjectDetail from './pages/ProjectDetail';
 import CreateProject from './pages/CreateProject';
 import CreateAgency from './pages/CreateAgency';
 import Agencies from './pages/Agencies';
+import Directory from './pages/Directory';
+import CreateCompany from './pages/CreateCompany';
 import TeamMembers from './pages/TeamMembers';
 import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -89,6 +91,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateAgency />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/directory"
+            element={
+              <ProtectedRoute>
+                <Directory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-company"
+            element={
+              <ProtectedRoute>
+                <CreateCompany />
               </ProtectedRoute>
             }
           />

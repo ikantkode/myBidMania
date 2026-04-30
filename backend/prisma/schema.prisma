@@ -31,6 +31,7 @@ model Agency {
   user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   contactPersons ContactPerson[]
   projects       Project[]
+  companies      CompanyAgency[]
   createdAt      DateTime       @default(now())
 }
 
@@ -44,20 +45,53 @@ model ContactPerson {
   createdAt DateTime @default(now())
 }
 
+model Company {
+  id             String         @id @default(cuid())
+  name           String
+  email          String?
+  phone          String?
+  agencies       CompanyAgency[]
+  projects       ProjectCompany[]
+  createdAt      DateTime       @default(now())
+}
+
+model CompanyAgency {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  agencyId  String
+  agency    Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([companyId, agencyId])
+}
+
+model ProjectCompany {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, companyId])
+}
+
 model Project {
-  id                    String    @id @default(cuid())
+  id                    String          @id @default(cuid())
   schoolName            String
   description           String
   bidDueDate            DateTime
   preBidWalkthroughDate DateTime
   address               String
   agencyId              String
-  agency                Agency    @relation(fields: [agencyId], references: [id], onDelete: Restrict)
+  agency                Agency          @relation(fields: [agencyId], references: [id], onDelete: Restrict)
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   addenda               Addendum[]
   files                 ProjectFile[]
-  createdAt             DateTime  @default(now())
+  companies             ProjectCompany[]
+  createdAt             DateTime        @default(now())
 }
 
 model Addendum {
